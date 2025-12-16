@@ -1,3 +1,5 @@
+\set ON_ERROR_STOP on
+
 \echo 'Cargando CRM - customers...'
 \COPY bronze.crm_cust_info FROM '/Users/jhongarciabarrera/VS - Local/Github/sql-data-warehouse/datasets/source_crm/cust_info.csv' CSV HEADER DELIMITER ',';
 
