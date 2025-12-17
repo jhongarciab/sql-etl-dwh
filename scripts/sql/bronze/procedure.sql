@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE bronze.reset_bronze()
+CREATE OR REPLACE PROCEDURE bronze.load_bronze()
 LANGUAGE plpgsql
 AS $$
 BEGIN
