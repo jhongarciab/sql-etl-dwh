@@ -1,3 +1,14 @@
+/*
+Stored Procedure: Truncate Bronze Layer 
+Script Purpose:
+    This stored procedure truncates the tables in the 'bronze' schema.
+    It performs the following actions:
+    - Truncates the bronze tables before loading data.
+Parameters:
+    None. 
+	  This stored procedure does not accept any parameters or return any values.
+*/
+
 CREATE OR REPLACE PROCEDURE bronze.load_bronze()
 LANGUAGE plpgsql
 AS $$
