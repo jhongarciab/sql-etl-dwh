@@ -25,7 +25,7 @@ SELECT cst_firstname, cst_lastname, cst_material_status, cst_gndr FROM silver.cr
 WHERE TRIM(cst_firstname) != cst_firstname
    OR TRIM(cst_lastname) != cst_lastname
    OR TRIM(cst_material_status) != cst_material_status
-  OR TRIM(cst_gndr) != cst_gndr
+  OR TRIM(cst_gndr) != cst_gndr;
 
 -- Data standarization and consistency
 SELECT DISTINCT cst_gndr FROM bronze.crm_cust_info;
@@ -57,14 +57,22 @@ WHERE prd_end_dt < prd_start_dt;
 SELECT * FROM silver.crm_prd_info;
 
 -- Sales details
--- Check for invalid dates
-SELECT 
-NULLIF(sls_order_dt, 0) FROM silver.crm_sales_details
-WHERE sls_order_dt <= 0 OR LENGTH(CAST(sls_order_dt AS TEXT)) != 8;
+-- Check for invalid dates (format/values) in BRONZE (raw int YYYYMMDD)
+SELECT sls_ord_num, sls_order_dt
+FROM bronze.crm_sales_details
+WHERE sls_order_dt <= 0
+   OR LENGTH(sls_order_dt::text) != 8;
 
--- Check for invalid date orders
-SELECT * FROM silver.crm_sales_details
-WHERE sls_order_dt > sls_ship_dt OR sls_order_dt > sls_due_dt;
+-- Check for invalid/NULL dates in SILVER (after conversion to DATE)
+SELECT sls_ord_num, sls_order_dt
+FROM silver.crm_sales_details
+WHERE sls_order_dt IS NULL;
+
+-- Check for invalid date orders in SILVER (business rule: order <= ship/due)
+SELECT *
+FROM silver.crm_sales_details
+WHERE sls_order_dt > sls_ship_dt
+   OR sls_order_dt > sls_due_dt;
 
 -- Business rules validation
 SELECT DISTINCT
@@ -118,7 +126,7 @@ cat,
 subcat,
 mainteance
 FROM silver.erp_px_cat_g1v2;
-*/
+
 -- Cheack for unwanted spaces in string characters
 SELECT * FROM silver.erp_px_cat_g1v2
 WHERE TRIM(cat) != cat

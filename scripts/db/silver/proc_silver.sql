@@ -85,7 +85,7 @@ BEGIN
         REPLACE(SUBSTRING(prd_key, 1, 5), '-', '_'),
         SUBSTRING(prd_key, 7, LENGTH(prd_key)),
         prd_nm,
-        COALESCE(prd_cost, 0),
+        prd_cost,
         CASE UPPER(TRIM(prd_line))
             WHEN 'M' THEN 'Mountain'
             WHEN 'R' THEN 'Road'

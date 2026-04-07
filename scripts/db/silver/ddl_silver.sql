@@ -45,7 +45,7 @@ CREATE TABLE silver.crm_sales_details (
     sls_price INT,
     dwh_create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-*/
+
 -- ERP Source Tables
 
 DROP TABLE IF EXISTS silver.erp_cust_az12;
