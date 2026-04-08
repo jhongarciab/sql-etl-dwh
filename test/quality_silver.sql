@@ -21,17 +21,15 @@ SELECT cst_id, COUNT(*) FROM silver.crm_cust_info
 GROUP BY cst_id HAVING COUNT(*) > 1 OR cst_id IS NULL;
 
 -- Unwanted spaces in strings characters 
-SELECT cst_firstname, cst_lastname, cst_material_status, cst_gndr FROM silver.crm_cust_info
+SELECT cst_firstname, cst_lastname, cst_marital_status, cst_gndr FROM silver.crm_cust_info
 WHERE TRIM(cst_firstname) != cst_firstname
    OR TRIM(cst_lastname) != cst_lastname
-   OR TRIM(cst_material_status) != cst_material_status
+   OR TRIM(cst_marital_status) != cst_marital_status
   OR TRIM(cst_gndr) != cst_gndr;
 
 -- Data standarization and consistency
-SELECT DISTINCT cst_gndr FROM bronze.crm_cust_info;
-SELECT DISTINCT cst_material_status FROM bronze.crm_cust_info;
-
-SELECT * FROM silver.crm_cust_info;
+SELECT DISTINCT cst_gndr FROM silver.crm_cust_info;
+SELECT DISTINCT cst_marital_status FROM silver.crm_cust_info;
 
 -- Product info
 -- Check for nulls and duplicates in primary key
@@ -124,20 +122,20 @@ SELECT
 id,
 cat,
 subcat,
-mainteance
+maintenance
 FROM silver.erp_px_cat_g1v2;
 
--- Cheack for unwanted spaces in string characters
+-- Check for unwanted spaces in string characters
 SELECT * FROM silver.erp_px_cat_g1v2
 WHERE TRIM(cat) != cat
   OR TRIM(subcat) != subcat
-  OR TRIM(mainteance) != mainteance;
+  OR TRIM(maintenance) != maintenance;
 
 -- Data standardization and consistency
 SELECT DISTINCT
 cat,
 subcat,
-mainteance
+maintenance
 FROM silver.erp_px_cat_g1v2;
 
 SELECT * FROM silver.erp_px_cat_g1v2;
