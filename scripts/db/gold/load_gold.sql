@@ -23,9 +23,9 @@ SELECT
     CASE WHEN ci.cst_gndr != 'NaN' THEN ci.cst_gndr -- CRM has priority of gender info
          ELSE ca.gen
     END AS gender,
-    ci.cst_material_status AS marital_status,
+    ci.cst_marital_status AS marital_status,
     ca.bdate AS birthdate,
-    ci.cst_create_data AS created_date
+    ci.cst_create_date AS created_date
 FROM silver.crm_cust_info ci
 LEFT JOIN silver.erp_cust_az12 ca
     ON ci.cst_key = ca.cid
@@ -44,7 +44,7 @@ SELECT
     pc.cat AS category,
     pc.subcat AS subcategory,
     pn.prd_line AS product_line,
-    pc.mainteance AS maintenance,
+    pc.maintenance AS maintenance,
     pn.prd_cost AS cost,
     pn.prd_start_dt AS start_date
 FROM silver.crm_prd_info pn
@@ -65,7 +65,7 @@ SELECT
     sd.sls_quantity AS quantity,
     sd.sls_price AS price
 FROM silver.crm_sales_details sd
-LEFT JOIN gold.dim_products pr 
+INNER JOIN gold.dim_products pr 
     ON sd.sls_prd_key = pr.product_number
-LEFT JOIN gold.dim_customers cu 
+INNER JOIN gold.dim_customers cu 
     ON sd.sls_cust_id = cu.customer_id;
