@@ -1,30 +1,39 @@
 /*
-Load Data into Bronze Layer
+Load Script: Bronze Layer
 Script Purpose:
-    This stored procedure loads data into the 'bronze' schema from external CSV files.
+    Loads raw CSV data into the 'bronze' schema from external CSV files.
+    Uses psql \COPY, so it must be executed via psql:
+
+        psql -U <user> -d <database> -f scripts/bronze/load_bronze.sql
+
+    Run from the project root so relative paths resolve correctly.
+
+Note:
+    Truncation is handled separately by CALL bronze.load_bronze()
+    before running this script.
+
 Parameters:
-    None. 
-	  This stored procedure does not accept any parameters or return any values.
+    None.
 */
 
 \set ON_ERROR_STOP on
 
-\echo 'Cargando CRM - customers...'
+\echo 'CRM - customers...'
 \COPY bronze.crm_cust_info FROM './datasets/source_crm/cust_info.csv' CSV HEADER DELIMITER ',';
 
-\echo 'Cargando CRM - products...'
+\echo 'CRM - products...'
 \COPY bronze.crm_prd_info FROM './datasets/source_crm/prd_info.csv' CSV HEADER DELIMITER ',';
 
-\echo 'Cargando CRM - sales...'
+\echo 'CRM - sales...'
 \COPY bronze.crm_sales_details FROM './datasets/source_crm/sales_details.csv' CSV HEADER DELIMITER ',';
 
-\echo 'Cargando ERP - customers...'
+\echo 'ERP - customers...'
 \COPY bronze.erp_cust_az12 FROM './datasets/source_erp/CUST_AZ12.csv' CSV HEADER DELIMITER ',';
 
-\echo 'Cargando ERP - locations...'
+\echo 'ERP - locations...'
 \COPY bronze.erp_loc_a101 FROM './datasets/source_erp/LOC_A101.csv' CSV HEADER DELIMITER ',';
 
-\echo 'Cargando ERP - categories...'
+\echo 'ERP - categories...'
 \COPY bronze.erp_px_cat_g1v2 FROM './datasets/source_erp/PX_CAT_G1V2.csv' CSV HEADER DELIMITER ',';
 
-\echo 'Carga BRONZE finalizada correctamente'
+\echo 'Bronze table upload completed successfully'

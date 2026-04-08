@@ -14,9 +14,9 @@ CREATE TABLE bronze.crm_cust_info (
     cst_key VARCHAR(50),
     cst_firstname VARCHAR(50),
     cst_lastname VARCHAR(50),
-    cst_material_status VARCHAR(50),
+    cst_marital_status VARCHAR(50),
     cst_gndr VARCHAR(50),
-    cst_create_data DATE
+    cst_create_date DATE
 );
 
 DROP TABLE IF EXISTS bronze.crm_prd_info;
@@ -63,5 +63,5 @@ CREATE TABLE bronze.erp_px_cat_g1v2 (
     id VARCHAR(50),
     cat VARCHAR(50),
     subcat VARCHAR(50),
-    mainteance VARCHAR(50)
+    maintenance VARCHAR(50)
 );
