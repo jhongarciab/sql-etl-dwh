@@ -73,7 +73,7 @@ SELECT
     cost,
     CASE WHEN cost < 100 THEN 'Bellow 100'
         WHEN cost BETWEEN 100 AND 500 THEN '100-500'
-        WHEN cost BETWEEN 500 AND 1000 THEN '500-100'
+        WHEN cost BETWEEN 500 AND 1000 THEN '500-1000'
         ELSE 'Above 1000'
     END cost_range
 FROM gold.dim_products
