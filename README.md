@@ -11,28 +11,52 @@ The project focuses on:
 - Business-ready analytical models
 - SQL-based ETL orchestration using stored procedures
 
+## ▶️ How to run (full pipeline)
+
+This repository includes a single-entry pipeline runner that rebuilds the `DataWarehouse` database end-to-end.
+
+```bash
+./pipeline.sh -U <postgres_user>
+```
+
+What it does:
+- Drops and recreates the `DataWarehouse` database (full reproducibility)
+- Initializes schemas: `bronze`, `silver`, `gold`
+- Bronze: creates tables, truncates, loads CSVs
+- Silver: creates tables, runs `CALL silver.load_silver()`
+- Gold: creates analytical views
+- Runs quality checks for Silver and Gold
+
+## 📄 Data contract
+
+- `docs/data_contract.md` — minimum verifiable expectations (derived from DDL + procedures + tests)
+- `docs/data_catalog.md` — gold layer column catalog
+
 ## 📂 Repository Structure
+
+```text
+sql-data-warehouse/
+├── datasets/
+├── docs/
+│   ├── data_contract.md
+│   ├── data_catalog.md
+│   ├── data_flow.png
+│   ├── data_integration.png
+│   ├── data_model.png
+│   └── naming_conventions.md
+├── scripts/
+│   ├── analytics/
+│   └── db/
+│       ├── init_db.sql
+│       ├── bronze/
+│       ├── silver/
+│       └── gold/
+├── test/
+│   ├── quality_silver.sql
+│   ├── quality_gold.sql
+│   └── proc_quality.sql
+├── pipeline.sh
+├── README.md
+├── LICENSE
+└── .gitignore
 ```
-data-warehouse-project/
-│
-├── datasets/                           # Raw datasets used for the project (ERP and CRM data)
-│
-├── docs/                               # Project documentation and architecture details
-│   ├── data_integration.png.           # File shows the project's architecture
-│   ├── data_catalog.md                 # Catalog of datasets, including field descriptions and metadata
-│   ├── data_flow.png                   # File for the data flow diagram
-│   ├── data_model.png                  # File for data models (star schema)
-│   ├── naming-conventions.md           # Consistent naming guidelines for tables, columns, and files
-│
-├── scripts/                            # SQL scripts for ETL and transformations
-│   ├── bronze/                         # Scripts for extracting and loading raw data
-│   ├── silver/                         # Scripts for cleaning and transforming data
-│   ├── gold/                           # Scripts for creating analytical models
-│
-├── tests/                              # Test scripts and quality files
-│
-├── README.md                           # Project overview and instructions
-├── LICENSE                             # License information for the repository
-├── .gitignore                          # Files and directories to be ignored by Git
-```
----
