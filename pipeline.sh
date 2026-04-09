@@ -1,13 +1,26 @@
 #!/bin/bash
 
-# =============================================================================
-# pipeline.sh — Full Data Warehouse Pipeline
-# Usage: ./pipeline.sh -U <postgres_user>
-# =============================================================================
+# Pipeline Script: Full Data Warehouse Pipeline
+# Script Purpose:
+#     This script orchestrates the full ETL pipeline for the Data Warehouse.
+#     It performs the following actions:
+#     - Drops and recreates the database for full reproducibility.
+#     - Initializes schemas (bronze, silver, gold).
+#     - Loads raw data into the Bronze layer.
+#     - Transforms and cleanses data into the Silver layer.
+#     - Creates analytical views in the Gold layer.
+#     - Runs quality checks on Silver and Gold layers.
+#
+# Usage:
+#     ./pipeline.sh -U <postgres_user>
+#
+# Parameters:
+#     -U  PostgreSQL user to connect with.
+#     None. Database name is fixed as 'DataWarehouse'.
 
-set -e  # Exit immediately if any command fails
+set -e
 
-# --- Parse arguments ---------------------------------------------------------
+# Parse arguments
 while getopts "U:" opt; do
     case $opt in
         U) PG_USER="$OPTARG" ;;
@@ -26,26 +39,29 @@ export PGPASSWORD
 
 DB_NAME="DataWarehouse"
 SCRIPTS_DIR="$(dirname "$0")/scripts"
+TEST_DIR="$(dirname "$0")/test"
+PIPELINE_START=$SECONDS
 
-# --- Helper function ---------------------------------------------------------
+# Helper: run a SQL file and report execution time
 run_sql() {
     local description="$1"
     local database="$2"
     local file="$3"
+    local step_start=$SECONDS
 
     echo ""
     echo ">> $description"
     psql -U "$PG_USER" -d "$database" -f "$file"
+    echo "   Done in $((SECONDS - step_start))s"
 }
 
-# =============================================================================
 echo "============================================="
 echo " Data Warehouse Pipeline"
-echo " User: $PG_USER"
+echo " User:     $PG_USER"
 echo " Database: $DB_NAME"
 echo "============================================="
 
-# --- Step 1: Drop and recreate the database ----------------------------------
+# Drop and recreate the database
 echo ""
 echo ">> Terminating active connections to '$DB_NAME'..."
 psql -U "$PG_USER" -d postgres -c "
@@ -55,35 +71,57 @@ psql -U "$PG_USER" -d postgres -c "
 "
 
 echo ">> Dropping and recreating database '$DB_NAME'..."
+step_start=$SECONDS
 psql -U "$PG_USER" -d postgres -c "DROP DATABASE IF EXISTS \"$DB_NAME\";"
 psql -U "$PG_USER" -d postgres -c "CREATE DATABASE \"$DB_NAME\";"
+echo "   Done in $((SECONDS - step_start))s"
 
-# --- Step 2: Initialize schemas ----------------------------------------------
+# Initialize schemas
 run_sql "Creating schemas (bronze, silver, gold)" "$DB_NAME" "$SCRIPTS_DIR/db/init_db.sql"
 
-# --- Step 3: Bronze layer ----------------------------------------------------
-run_sql "Creating Bronze tables"     "$DB_NAME" "$SCRIPTS_DIR/db/bronze/ddl_bronze.sql"
-run_sql "Creating Bronze procedure"  "$DB_NAME" "$SCRIPTS_DIR/db/bronze/proc_bronze.sql"
+# Bronze layer
+run_sql "Creating Bronze tables"    "$DB_NAME" "$SCRIPTS_DIR/db/bronze/ddl_bronze.sql"
+run_sql "Creating Bronze procedure" "$DB_NAME" "$SCRIPTS_DIR/db/bronze/proc_bronze.sql"
 
 echo ""
+step_start=$SECONDS
 echo ">> Truncating Bronze tables..."
 psql -U "$PG_USER" -d "$DB_NAME" -c "CALL bronze.load_bronze();"
+echo "   Done in $((SECONDS - step_start))s"
 
 run_sql "Loading raw data into Bronze" "$DB_NAME" "$SCRIPTS_DIR/db/bronze/load_bronze.sql"
 
-# --- Step 4: Silver layer ----------------------------------------------------
-run_sql "Creating Silver tables"     "$DB_NAME" "$SCRIPTS_DIR/db/silver/ddl_silver.sql"
-run_sql "Creating Silver procedure"  "$DB_NAME" "$SCRIPTS_DIR/db/silver/proc_silver.sql"
+# Silver layer
+run_sql "Creating Silver tables"    "$DB_NAME" "$SCRIPTS_DIR/db/silver/ddl_silver.sql"
+run_sql "Creating Silver procedure" "$DB_NAME" "$SCRIPTS_DIR/db/silver/proc_silver.sql"
 
 echo ""
+step_start=$SECONDS
 echo ">> Running Silver ETL (Bronze -> Silver)..."
 psql -U "$PG_USER" -d "$DB_NAME" -c "CALL silver.load_silver();"
+echo "   Done in $((SECONDS - step_start))s"
 
-# --- Step 5: Gold layer ------------------------------------------------------
+# Silver quality checks
+run_sql "Creating quality check procedures" "$DB_NAME" "$TEST_DIR/proc_quality.sql"
+
+echo ""
+step_start=$SECONDS
+echo ">> Running Silver quality checks..."
+psql -U "$PG_USER" -d "$DB_NAME" -c "CALL silver.quality_check();"
+echo "   Done in $((SECONDS - step_start))s"
+
+# Gold layer
 run_sql "Creating Gold views (dim_customers, dim_products, fact_sales)" "$DB_NAME" "$SCRIPTS_DIR/db/gold/load_gold.sql"
 
-# =============================================================================
+# Gold quality checks
+echo ""
+step_start=$SECONDS
+echo ">> Running Gold quality checks..."
+psql -U "$PG_USER" -d "$DB_NAME" -c "CALL gold.quality_check();"
+echo "   Done in $((SECONDS - step_start))s"
+
 echo ""
 echo "============================================="
 echo " Pipeline completed successfully"
+echo " Total time: $((SECONDS - PIPELINE_START))s"
 echo "============================================="
