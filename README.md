@@ -36,25 +36,35 @@ What it does:
 
 ```text
 sql-data-warehouse/
+│   
 ├── datasets/
+│   ├── source_crm/
+│   └── source_erp/
+│ 
 ├── docs/
+│   ├── logs/
+│   │ 
 │   ├── data_contract.md
 │   ├── data_catalog.md
 │   ├── data_flow.png
 │   ├── data_integration.png
 │   ├── data_model.png
 │   └── naming_conventions.md
+│ 
 ├── scripts/
 │   ├── analytics/
+│   │ 
 │   └── db/
 │       ├── init_db.sql
 │       ├── bronze/
 │       ├── silver/
 │       └── gold/
+│ 
 ├── test/
 │   ├── quality_silver.sql
 │   ├── quality_gold.sql
 │   └── proc_quality.sql
+│
 ├── pipeline.sh
 ├── README.md
 ├── LICENSE
