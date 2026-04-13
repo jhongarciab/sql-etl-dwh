@@ -41,6 +41,11 @@ DB_NAME="DataWarehouse"
 SCRIPTS_DIR="$(dirname "$0")/scripts"
 TEST_DIR="$(dirname "$0")/test"
 PIPELINE_START=$SECONDS
+LOG_DIR="$(dirname "$0")/docs/logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/pipeline_$(date +%Y%m%d_%H%M%S).log"
+
+main() {
 
 # Helper: run a SQL file and report execution time
 run_sql() {
@@ -125,3 +130,7 @@ echo "============================================="
 echo " Pipeline completed successfully"
 echo " Total time: $((SECONDS - PIPELINE_START))s"
 echo "============================================="
+
+}
+
+main 2>&1 | tee "$LOG_FILE"
